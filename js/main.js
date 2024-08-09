@@ -84,12 +84,10 @@ function addTask(data) {
 			offer.style.display = 'flex'
 		}
 	})
-
 	let completeButton = newTask.querySelector('.newTask__btn-complete')
 	completeButton.addEventListener('click', () => {
 		toggleCompleteTask(newTask, time)
 	})
-
 	let editButton = newTask.querySelector('.newTask__btn-edit')
 	editButton.addEventListener('click', () => {
 		editTask(data,newTask)
