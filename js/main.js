@@ -89,7 +89,6 @@ function addTask(data, isComplete = false) {
     // Обработчик "delete"
     const deleteButton = newTask.querySelector('.main__btn-delete')
     deleteButton.addEventListener('click', () => removeTask(newTask, time))
-    
     // Обработчик "complete" и "return"
     if (isComplete) {
         const returnButton = newTask.querySelector('.main__btn-return')
