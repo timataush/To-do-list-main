@@ -177,7 +177,6 @@
   align-items: center;
   margin: auto;
 }
-
 .main__counter {
   font-size: 30px;
   line-height: 0px;
@@ -250,12 +249,7 @@
   font-family: Proxima Nova;
   margin-top: 15px;
 }
-
-.newTask {
-  width: 100%;
-  margin-top: 30px;
-}
-.newTask__container {
+.main__container {
   width: 1200px;
   height: 250px;
   display: flex;
@@ -264,12 +258,12 @@
   border-radius: 6px;
   border: 5px solid black;
 }
-.newTask__left {
+.main__left {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
-.newTask__left-title {
+.main__title {
   display: flex;
   align-items: center;
   height: 60px;
@@ -280,7 +274,7 @@
   font-size: 50px;
   line-height: 18px;
 }
-.newTask__left-description {
+.main__description {
   display: flex;
   align-items: center;
   height: 60px;
@@ -291,7 +285,7 @@
   text-transform: uppercase;
   font-size: 35px;
 }
-.newTask__left-level {
+.main__level {
   display: flex;
   align-items: center;
   height: 60px;
@@ -302,16 +296,16 @@
   font-size: 50px;
   line-height: 18px;
 }
-.newTask__right {
+.main__right {
   display: flex;
   justify-content: space-evenly;
 }
-.newTask__right-btn {
+.main__btn {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
 }
-.newTask__right-time {
+.main__time {
   margin-top: 20px;
   color: inherit;
   text-decoration: none;
@@ -320,7 +314,7 @@
   line-height: 18px;
   margin-right: 15px;
 }
-.newTask__btn-complete {
+.main__btn-complete {
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -334,7 +328,7 @@
   align-content: center;
   font-family: Proxima Nova;
 }
-.newTask__btn-edit {
+.main__btn-edit {
   margin-bottom: 10px;
   color: inherit;
   text-decoration: none;
@@ -346,7 +340,7 @@
   align-content: center;
   font-family: Proxima Nova;
 }
-.newTask__btn-delete {
+.main__btn-delete {
   margin-bottom: 10px;
   color: inherit;
   text-decoration: none;
@@ -357,4 +351,20 @@
   cursor: pointer;
   align-content: center;
   font-family: Proxima Nova;
+}
+.main__btn-return {
+  margin-bottom: 10px;
+  color: inherit;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 30px;
+  line-height: 18px;
+  height: 40px;
+  cursor: pointer;
+  align-content: center;
+  font-family: Proxima Nova;
+}
+.main__task {
+  width: 100%;
+  margin-top: 30px;
 }/*# sourceMappingURL=style.css.map */

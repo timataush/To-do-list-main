@@ -16,321 +16,283 @@ let menuComplete = document.querySelector('.main__complete')
 // Обработчики событий
 modalExit.addEventListener('click', modalClose)
 modalOverlay.addEventListener('click', overlayExit)
-save.addEventListener('click', createTask)
+save.addEventListener('click', modalClickSave)
 cancel.addEventListener('click', modalClose)
 
 // Счетчики задач
 let counter = 0
 let counterAll = 0
 
+// Статус редактирования
+let isEditing = false
+let currentEditingTask = null
+
 // LocalStorage
 let tasksData = JSON.parse(localStorage.getItem('data')) || []
 
+// Инициализация
 init()
-function init() {
-	if (tasksData.length) {
-		offer.style.display = 'none'
-		counterElement.style.display = 'block'
-	}
-	// checkCounter()
-	counterAll = tasksData.length
-	counterValue.innerHTML = `${counter}/${counterAll}`
-	mainComplete()
-	checkCounter()
 
-	// Создание задач из LocalStorage
-	tasksData.forEach(task => {
-		addTask(task)
-	})
+function init() {
+    if (tasksData.length) {
+        offer.style.display = 'none'
+        counterElement.style.display = 'block'
+    } else {
+        offer.style.display = 'flex'
+        counterElement.style.display = 'none'
+    }
+    counterAll = tasksData.length;
+    counter = tasksData.filter(task => task.isDone).length
+    counterValue.innerHTML = `${counter}/${counterAll}`
+
+    checkCounter()
+    isVisibleComplete()
+
+    // Создание задач из LocalStorage
+    tasksData.forEach(task => addTask(task, task.isDone))
 }
 
-inputTitle.addEventListener('input', inputChange)
-inputDescription.addEventListener('input', inputChange)
+modalBtn.forEach(creature => {
+    creature.addEventListener('click', openModal)
+})
+offerBtn.forEach(creature => {
+    creature.addEventListener('click', openModal)
+})
 
-function addTask(data) {
-	let { title, description, color, level, time, isDone = false } = data
-
-	let newTask = document.createElement('div')
-	newTask.className = 'newTask'
-	newTask.innerHTML = `
-        <div class="newTask__container">
-            <div class="newTask__left">
-                <span class="newTask__left-title">${title}</span>
-                <span class="newTask__left-description">${description}</span>
-                <span class="newTask__left-level">${level}</span>
+function addTask(data, isComplete = false) {
+    let { title, description, color, level, time, isDone = false } = data
+    let newTask = document.createElement('div')
+    newTask.className = 'main__task'
+    newTask.innerHTML = `
+        <div class="main__container">
+            <div class="main__left">
+                <span class="main__title">${title}</span>
+                <span class="main__description">${description}</span>
+                <span class="main__level">${level}</span>
             </div>
-            <div class="newTask__right">
-                <span class="newTask__right-time">${new Date(time).toLocaleString()}</span>
-                <div class="newTask__right-btn">
-                    <button data-action="complete" class="newTask__btn-complete">complete</button>
-                    <button data-action="edit" class="newTask__btn-edit">edit</button>
-                    <button data-action="delete" class="newTask__btn-delete">delete</button>
+            <div class="main__right">
+                <span class="main__time">${new Date(time).toLocaleString()}</span>
+                <div class="main__btn">
+                    ${isComplete ? '<button class="main__btn-return">return</button>' : '<button class="main__btn-complete">complete</button>'}
+                    <button class="main__btn-edit">edit</button>
+                    <button class="main__btn-delete">delete</button>
+                </div>
+            </div>
+         </div>
+     `
+    let parent = isComplete ? document.querySelector('.main__complete') : document.querySelector('.main__task-container')
+    parent.appendChild(newTask)
+
+    let newTaskContainer = newTask.querySelector('.main__container')
+    newTaskContainer.style.borderColor = color
+
+    // Обработчик "delete"
+    const deleteButton = newTask.querySelector('.main__btn-delete')
+    deleteButton.addEventListener('click', () => removeTask(newTask, time))
+    
+    // Обработчик "complete" и "return"
+    if (isComplete) {
+        const returnButton = newTask.querySelector('.main__btn-return')
+        returnButton.addEventListener('click', () => 
+		toggleCompleteTask(newTask, time, false))
+    } else {
+        const completeButton = newTask.querySelector('.main__btn-complete')
+        completeButton.addEventListener('click', () => 
+		toggleCompleteTask(newTask, time, true))
+    }
+    
+    // Обработчик "edit"
+    const editButton = newTask.querySelector('.main__btn-edit')
+    editButton.addEventListener('click', () =>
+	 editTask(data, newTask))
+}
+
+function removeTask(taskElement, taskTime) {
+    taskElement.remove();
+    tasksData = tasksData.filter(task => task.time !== taskTime)
+    localStorage.setItem('data', JSON.stringify(tasksData))
+    counterAll--
+    counterValue.innerHTML = `${counter}/${counterAll}`
+    checkCounter()
+    init();
+}
+
+function toggleCompleteTask(taskElement, taskTime, isComplete) {
+    let task = tasksData.find(task => task.time === taskTime)
+    if (!task) return
+    
+    task.isDone = isComplete
+    localStorage.setItem('data', JSON.stringify(tasksData))
+
+    taskElement.remove()
+    addTask(task, isComplete)
+    
+	if (isComplete) {
+					counter++
+				} else {
+					counter--
+				}
+    counterValue.innerHTML = `${counter}/${counterAll}`
+    checkCounter()
+    isVisibleComplete()
+}
+
+function editTask(taskData, taskElement) {
+    openModal()
+    isEditing = true
+    currentEditingTask = { taskData, taskElement }
+    inputTitle.value = taskData.title
+    inputDescription.value = taskData.description
+    document.querySelector('.modal__input-color').value = taskData.color
+    document.querySelector(`input[name="level"][value="${taskData.level}"]`).checked = true
+}
+
+function updateTask(taskTime, taskElement) {
+    if (!warning()) return
+
+    let updatedTask = {
+        title: inputTitle.value,
+        description: inputDescription.value,
+        color: document.querySelector('.modal__input-color').value,
+        level: document.querySelector('input[name="level"]:checked').value,
+        time: taskTime,
+        isDone: currentEditingTask.taskData.isDone
+    }
+
+    let taskIndex = tasksData.findIndex(task => task.time === taskTime)
+    if (taskIndex !== -1) {
+        tasksData[taskIndex] = updatedTask
+    }
+    localStorage.setItem('data', JSON.stringify(tasksData))
+
+    taskElement.innerHTML = `
+        <div class="main__container">
+            <div class="main__left">
+                <span class="main__title">${updatedTask.title}</span>
+                <span class="main__description">${updatedTask.description}</span>
+                <span class="main__level">${updatedTask.level}</span>
+            </div>
+            <div class="main__right">
+                <span class="main__time">${new Date(updatedTask.time).toLocaleString()}</span>
+                <div class="main__btn">
+                    ${updatedTask.isDone ? '<button class="main__btn-return">return</button>' : '<button class="main__btn-complete">complete</button>'}
+                    <button class="main__btn-edit">edit</button>
+                    <button class="main__btn-delete">delete</button>
                 </div>
             </div>
         </div>
     `
 
-	let parent = document.querySelector('.main__counter')
-	parent.insertAdjacentElement('afterend', newTask)
+    let newTaskContainer = taskElement.querySelector('.main__container')
+    newTaskContainer.style.borderColor = updatedTask.color;
 
-	let newTaskContainer = newTask.querySelector('.newTask__container')
-	newTaskContainer.style.borderColor = color
+    const deleteButton = taskElement.querySelector('.main__btn-delete')
+    deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
 
-	// Обработчик "delete"
-	let deleteButton = newTask.querySelector('.newTask__btn-delete')
-	deleteButton.addEventListener('click', () => {
-		removeTask(newTask, time)
-		if (tasksData.length <= 0) {
-			offer.style.display = 'flex'
-		}
-	})
-	let completeButton = newTask.querySelector('.newTask__btn-complete')
-	completeButton.addEventListener('click', () => {
-		toggleCompleteTask(newTask, time)
-	})
-	let editButton = newTask.querySelector('.newTask__btn-edit')
-	editButton.addEventListener('click', () => {
-		editTask(data,newTask)
-	})
+    if (updatedTask.isDone) {
+        const returnButton = taskElement.querySelector('.main__btn-return')
+        returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
+    } else {
+        const completeButton = taskElement.querySelector('.main__btn-complete')
+        completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
+    }
+
+    const editButton = taskElement.querySelector('.main__btn-edit')
+    editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
+
+    isEditing = false
+    currentEditingTask = null
+    reset()
 }
 
-function removeTask(taskElement, taskTime) {
-	taskElement.remove()
-	tasksData = tasksData.filter(task => task.time !== taskTime)
-	localStorage.setItem('data', JSON.stringify(tasksData))
-	counterAll--
-	counterValue.innerHTML = `${counter}/${counterAll}`
-	checkCounter()
-	
-	
-	// mainComplete()
-	
-	
-}
-
-function toggleCompleteTask(newTask, taskTime) {
-	let menuComplete = document.querySelector('.main__complete')
-	menuComplete.style.display = 'block'
-	// mainComplete()
-	
-	let task = tasksData.find(task => task.time === taskTime)
-
-	if (task) {
-		task.isDone = true
-		let containerComplete = document.createElement('div')
-		containerComplete.className = 'newTask'
-		containerComplete.innerHTML = `
-	        <div class="newTask__container">
-	            <div class="newTask__left">
-	                <span class="newTask__left-title">${task.title}</span>
-	                <span class="newTask__left-description">${
-										task.description
-									}</span>
-	                <span class="newTask__left-level">${task.level}</span>
-	            </div>
-	            <div class="newTask__right">
-	                <span class="newTask__right-time">${new Date(
-										task.time
-									).toLocaleString()}</span>
-	                <div class="newTask__right-btn">
-	                    <button data-action="edit" class="newTask__btn-edit">edit</button>
-	                    <button data-action="delete" class="newTask__btn-delete">delete</button>
-	                </div>
-	            </div>
-	        </div>
-	    `
-		let parent = document.querySelector('.main__complete')
-		parent.append(containerComplete)
-        // !!!!!!!!!!!!!!!!!!!!!!!!!
-		// tasksData = tasksData.filter(task => task.time !== taskTime)
-		// localStorage.setItem('data', JSON.stringify(tasksData))
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!
-		newTask.remove()
-		checkCounter()
-		
-		
-
-		counter++
-		counterValue.innerHTML = `${counter}/${counterAll}`
-
-		// Добавляем обработчики для кнопок выполненной задачи
-		containerComplete.querySelector('.newTask__btn-delete').addEventListener('click', () => {
-				removeTask(containerComplete, task.time)
-				counter--
-				counterValue.innerHTML = `${counter}/${counterAll}`
-				// mainComplete()
-				
-				if (tasksData.length) {
-					offer.style.display = 'none'
-					if(counter > 0){
-						offer.style.display = 'none'
-					}
-				}else {
-					offer.style.display = 'flex'
-					mainComplete()
-				}
-				
-				checkCounter()
-			})
-		containerComplete.querySelector('.newTask__btn-edit').addEventListener('click', () => {
-				// task = tasksData.find(task => task.time === taskTime)
-				newTask.remove()
-			})
-	}
-	
-}
-
-
-function editTask(taskData) {
-	openModal()
-	inputTitle.value = taskData.title
-	inputDescription.value = taskData.description
-	document.querySelector('.modal__input-color').value = taskData.color
-	document.querySelector(`input[name="level"][value="${taskData.level}"]`).checked = true
-   
-	save.removeEventListener('click', createTask)
-   
-	save.addEventListener('click', function updateTaskHandler() {
-	 updateTask(taskData.time)
-	 //избежать дублирование
-	 save.removeEventListener('click', updateTaskHandler)
-	});
-   }
-   
-   function updateTask(taskTime) {
-	if (!warning()) return
-   
-	let updatedTask = {
-	 title: inputTitle.value,
-	 description: inputDescription.value,
-	 color: document.querySelector('.modal__input-color').value,
-	 level: document.querySelector('input[name="level"]:checked').value,
-	 time: taskTime,
-	 isDone: false
-	}
-   
-	tasksData = tasksData.map(task => task.time === taskTime ? updatedTask : task)
-	localStorage.setItem('data', JSON.stringify(tasksData))
-   
-	// Обновление отображения задачи на странице
-	let taskElements = document.querySelectorAll('.newTask')
-	taskElements.forEach(taskElement => {
-	 let timeElement = taskElement.querySelector('.newTask__right-time')
-	 if (timeElement.textContent === new Date(taskTime).toLocaleString()) {
-	  taskElement.querySelector('.newTask__left-title').textContent = updatedTask.title
-	  taskElement.querySelector('.newTask__left-description').textContent = updatedTask.description
-	  taskElement.querySelector('.newTask__left-level').textContent = updatedTask.level
-	  taskElement.querySelector('.newTask__right-time').textContent = new Date(updatedTask.time).toLocaleString()
-	  taskElement.querySelector('.newTask__container').style.borderColor = updatedTask.color
-	 }
-	})
-   
-	reset()
-   }
-   
-   
-   function mainComplete() {
-	if (counter <= 0) {
-		menuComplete.style.display = 'none'
-		offer.style.display = 'flex'
-	} else {
-		menuComplete.style.display = 'block'
-	}
+function isVisibleComplete() {
+    menuComplete.style.display = counter <= 0 ? 'none' : 'block'
 }
 
 function checkCounter() {
-	if (counterAll <= 0) {
-		counterElement.style.display = 'none'
-	} else {
-		counterElement.style.display = 'block'
-	}
+    counterElement.style.display = counterAll <= 0 ? 'none' : 'block'
 }
 
 function inputChange() {
-	toggleWarning()
+    toggleWarning()
 }
 
-modalBtn.forEach(creature => {
-	creature.addEventListener('click', openModal)
-})
-offerBtn.forEach(creature => {
-	creature.addEventListener('click', openModal)
-})
-
 function openModal() {
-	toggleWarning()
-	modalOverlay.style.display = 'block'
-	modalDialog.style.display = 'block'
+    toggleWarning()
+    modalOverlay.style.display = 'block'
+    modalDialog.style.display = 'block'
 }
 
 function toggleWarning() {
-	inputTitle.classList.remove('warning')
-	inputDescription.classList.remove('warning')
+    inputTitle.classList.remove('warning')
+    inputDescription.classList.remove('warning')
 }
 
 function modalClose(e) {
-	e.preventDefault()
-	reset()
-	toggleWarning()
+    e.preventDefault()
+    reset()
+    toggleWarning()
 }
 
 function overlayExit(e) {
-	if (e.target === modalOverlay) {
-		reset()
-	}
+    if (e.target === modalOverlay) {
+        reset()
+    }
 }
 
 function reset() {
-	modalOverlay.style.display = 'none'
-	modalDialog.style.display = 'none'
-	inputTitle.value = ''
-	inputDescription.value = ''
-	document.querySelector('input[name="level"][value="Low"]').checked = true
-	// save.removeEventListener('click', updatedTask)
-	save.addEventListener('click', createTask)
+    modalOverlay.style.display = 'none'
+    modalDialog.style.display = 'none'
+    inputTitle.value = ''
+    inputDescription.value = ''
+    document.querySelector('input[name="level"][value="Low"]').checked = true
+    isEditing = false
+    currentEditingTask = null
+    // Перепривязка обработчика для кнопки "Сохранить"
+    save.removeEventListener('click', modalClickSave)
+    save.addEventListener('click', modalClickSave)
+}
+
+function modalClickSave(e) {
+    e.preventDefault()
+    if (isEditing) {
+        if (currentEditingTask) {
+            updateTask(currentEditingTask.taskData.time, currentEditingTask.taskElement)
+        }
+    } else {
+        createTask()
+    }
 }
 
 function warning() {
-	inputTitle.value
-		? inputTitle.classList.remove('warning')
-		: inputTitle.classList.add('warning')
-	inputDescription.value
-		? inputDescription.classList.remove('warning')
-		: inputDescription.classList.add('warning')
-
-	return inputTitle.value && inputDescription.value
+    inputTitle.value ? inputTitle.classList.remove('warning') : inputTitle.classList.add('warning')
+    inputDescription.value ? inputDescription.classList.remove('warning') : inputDescription.classList.add('warning')
+    return inputTitle.value && inputDescription.value
 }
 
 function createTask(e) {
-	e.preventDefault()
+    // e.preventDefault()
+    if (!warning() || isEditing) return
 
-	if (!warning()) return
+    offer.style.display = 'none'
 
-	offer.style.display = 'none'
+    let newTaskData = {
+        title: inputTitle.value,
+        description: inputDescription.value,
+        color: document.querySelector('.modal__input-color').value,
+        level: document.querySelector('input[name="level"]:checked').value,
+        time: new Date().getTime(),
+        isDone: false
+    }
 
-	
+    tasksData.push(newTaskData)
+    localStorage.setItem('data', JSON.stringify(tasksData))
 
-	let newTaskData = {
-		title: inputTitle.value,
-		description: inputDescription.value,
-		color: document.querySelector('.modal__input-color').value,
-		level: document.querySelector('input[name="level"]:checked').value,
-		time: new Date().getTime(),
-		isDone: false
-	}
+    addTask(newTaskData)
+    reset()
 
-	tasksData.push(newTaskData)
-	localStorage.setItem('data', JSON.stringify(tasksData))
-
-	addTask(newTaskData)
-	reset()
-
-	counterAll++
-	counterValue.innerHTML = `${counter}/${counterAll}`
-	checkCounter()
+    counterAll++
+    counterValue.innerHTML = `${counter}/${counterAll}`
+    checkCounter()
+    isVisibleComplete()
 }
-
-if (tasksData.length) {
-	offer.style.display = 'none'
-}
-
