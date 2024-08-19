@@ -48,9 +48,10 @@ function init() {
     checkCounter()
     isVisibleComplete()
 
-    // Создание задач из LocalStorage
-    tasksData.forEach(task => addTask(task, task.isDone))
+    
 }
+// Создание задач из LocalStorage
+tasksData.forEach(task => addTask(task, task.isDone))
 
 modalBtn.forEach(creature => {
     creature.addEventListener('click', openModal)
@@ -88,7 +89,9 @@ function addTask(data, isComplete = false) {
 
     // Обработчик "delete"
     const deleteButton = newTask.querySelector('.main__btn-delete')
-    deleteButton.addEventListener('click', () => removeTask(newTask, time))
+    deleteButton.addEventListener('click', () => 
+
+    removeTask(newTask, time))
     // Обработчик "complete" и "return"
     if (isComplete) {
         const returnButton = newTask.querySelector('.main__btn-return')
@@ -113,7 +116,7 @@ function removeTask(taskElement, taskTime) {
     counterAll--
     counterValue.innerHTML = `${counter}/${counterAll}`
     checkCounter()
-    init();
+    init()
 }
 
 function toggleCompleteTask(taskElement, taskTime, isComplete) {
@@ -134,6 +137,7 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
     counterValue.innerHTML = `${counter}/${counterAll}`
     checkCounter()
     isVisibleComplete()
+    
 }
 
 function editTask(taskData, taskElement) {
