@@ -12,12 +12,16 @@ let offer = document.querySelector('.main__offer')
 let counterElement = document.querySelector('.main__counter')
 let counterValue = document.querySelector('.main__quantity-num')
 let menuComplete = document.querySelector('.main__complete')
+let headerSetting = document.querySelector('.header__setting')
+let subMenu = document.querySelector('.sub-menu-wrap')
 
 // Обработчики событий
 modalExit.addEventListener('click', modalClose)
 modalOverlay.addEventListener('click', overlayExit)
 save.addEventListener('click', modalClickSave)
 cancel.addEventListener('click', modalClose)
+headerSetting.addEventListener('click', toggleMenu)
+document.addEventListener('click',subMenuExit )
 
 // Счетчики задач
 let counter = 0
@@ -47,7 +51,6 @@ function init() {
 
     checkCounter()
     isVisibleComplete()
-
     
 }
 // Создание задач из LocalStorage
@@ -75,7 +78,7 @@ function addTask(data, isComplete = false) {
                 <span class="main__time">${new Date(time).toLocaleString()}</span>
                 <div class="main__btn">
                     ${isComplete ? '<button class="main__btn-return">return</button>' : '<button class="main__btn-complete">complete</button>'}
-                    <button class="main__btn-edit">edit</button>
+                    ${isComplete ? '' : '<button class="main__btn-edit">edit</button>'}
                     <button class="main__btn-delete">delete</button>
                 </div>
             </div>
@@ -89,25 +92,24 @@ function addTask(data, isComplete = false) {
 
     // Обработчик "delete"
     const deleteButton = newTask.querySelector('.main__btn-delete')
-    deleteButton.addEventListener('click', () => 
+    deleteButton.addEventListener('click', () => removeTask(newTask, time))
 
-    removeTask(newTask, time))
     // Обработчик "complete" и "return"
     if (isComplete) {
         const returnButton = newTask.querySelector('.main__btn-return')
-        returnButton.addEventListener('click', () => 
-		toggleCompleteTask(newTask, time, false))
+        returnButton.addEventListener('click', () => toggleCompleteTask(newTask, time, false))
     } else {
         const completeButton = newTask.querySelector('.main__btn-complete')
-        completeButton.addEventListener('click', () => 
-		toggleCompleteTask(newTask, time, true))
+        completeButton.addEventListener('click', () => toggleCompleteTask(newTask, time, true))
     }
-    
+
     // Обработчик "edit"
-    const editButton = newTask.querySelector('.main__btn-edit')
-    editButton.addEventListener('click', () =>
-	 editTask(data, newTask))
+    if (!isComplete) {
+        const editButton = newTask.querySelector('.main__btn-edit')
+        editButton.addEventListener('click', () => editTask(data, newTask))
+    }
 }
+
 
 function removeTask(taskElement, taskTime) {
     taskElement.remove();
@@ -299,3 +301,34 @@ function createTask(e) {
     checkCounter()
     isVisibleComplete()
 }
+
+// тёмная тема
+function darkMode() {
+    const body = document.body
+    let wasDarkMode = localStorage.getItem('darkMode') === 'true'
+    localStorage.setItem('darkMode', !wasDarkMode)
+    body.classList.toggle('dark-mode', !wasDarkMode)
+    modalDialog.classList.toggle('dark-mode', !wasDarkMode)
+    subMenu.classList.toggle('dark-mode', !wasDarkMode)
+}
+document.querySelector('.change-mode').addEventListener('click', darkMode)
+
+function onLoad() {
+    const isDarkMode = localStorage.getItem('darkMode') === 'true'
+    document.body.classList.toggle('dark-mode', isDarkMode)
+    modalDialog.classList.toggle('dark-mode', isDarkMode)
+
+}
+document.addEventListener('DOMContentLoaded', onLoad)
+
+// меню
+function toggleMenu(){
+  subMenu.classList.toggle( "open-menu")
+}
+
+function subMenuExit(e) {
+    if (!subMenu.contains(e.target) && !headerSetting.contains(e.target)) {
+        subMenu.classList.remove("open-menu")
+    }
+}
+
