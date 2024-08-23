@@ -1,27 +1,34 @@
 // Важные объявления переменных
-let modalBtn = document.querySelectorAll('.header__creature')
+let openModalBtn = document.querySelectorAll('.header__creature')
 let offerBtn = document.querySelectorAll('.main__creature')
 let modalOverlay = document.querySelector('.modal__overlay')
 let modalDialog = document.querySelector('.modal__dialog')
 let modalExit = document.querySelector('.modal__close')
-let save = document.querySelector('.btn.ok')
-let cancel = document.querySelector('.btn.cancel')
+let modalSave = document.querySelector('.btn.ok')
+let modalCancel = document.querySelector('.btn.cancel')
 let inputTitle = document.querySelector('.modal__input-title')
 let inputDescription = document.querySelector('.modal__input-description')
 let offer = document.querySelector('.main__offer')
 let counterElement = document.querySelector('.main__counter')
 let counterValue = document.querySelector('.main__quantity-num')
-let menuComplete = document.querySelector('.main__complete')
+let textComplete = document.querySelector('.main__text')
+let mainComplete = document.querySelector('.main__complete')
 let headerSetting = document.querySelector('.header__setting')
-let subMenu = document.querySelector('.sub-menu-wrap')
+let subMenu = document.querySelector('.sub__menu-wrap')
+let sortUp = document.querySelector('.header__sort-up')
+let sortDown = document.querySelector('.header__sort-down')
 
 // Обработчики событий
 modalExit.addEventListener('click', modalClose)
 modalOverlay.addEventListener('click', overlayExit)
-save.addEventListener('click', modalClickSave)
-cancel.addEventListener('click', modalClose)
+modalSave.addEventListener('click', modalClickSave)
+modalCancel.addEventListener('click', modalClose)
 headerSetting.addEventListener('click', toggleMenu)
 document.addEventListener('click',subMenuExit )
+sortUp.addEventListener('click', dateUp)
+sortDown.addEventListener('click', dateDown)
+
+
 
 // Счетчики задач
 let counter = 0
@@ -51,12 +58,13 @@ function init() {
 
     checkCounter()
     isVisibleComplete()
+    isVisibleTextComplete()
     
 }
 // Создание задач из LocalStorage
 tasksData.forEach(task => addTask(task, task.isDone))
 
-modalBtn.forEach(creature => {
+openModalBtn.forEach(creature => {
     creature.addEventListener('click', openModal)
 })
 offerBtn.forEach(creature => {
@@ -108,6 +116,7 @@ function addTask(data, isComplete = false) {
         const editButton = newTask.querySelector('.main__btn-edit')
         editButton.addEventListener('click', () => editTask(data, newTask))
     }
+    
 }
 
 
@@ -121,26 +130,69 @@ function removeTask(taskElement, taskTime) {
     init()
 }
 
+
 function toggleCompleteTask(taskElement, taskTime, isComplete) {
     let task = tasksData.find(task => task.time === taskTime)
     if (!task) return
-    
+
     task.isDone = isComplete
     localStorage.setItem('data', JSON.stringify(tasksData))
 
     taskElement.remove()
-    addTask(task, isComplete)
-    
-	if (isComplete) {
-					counter++
-				} else {
-					counter--
-				}
+
+    let containerComplete = document.createElement('div')
+    containerComplete.className = 'main__task'
+    containerComplete.innerHTML = `
+        <div class="main__container">
+            <div class="main__left">
+                <span class="main__title">${task.title}</span>
+                <span class="main__description">${task.description}</span>
+                <span class="main__level">${task.level}</span>
+            </div>
+            <div class="main__right">
+                <span class="main__time">${new Date(task.time).toLocaleString()}</span>
+                <div class="main__btn">
+                    ${isComplete ? '<button class="main__btn-return">return</button>' : '<button class="main__btn-complete">complete</button>'}
+                    ${!isComplete ? '<button class="main__btn-edit">edit</button>' : ''}
+                    <button class="main__btn-delete">delete</button>
+                </div>
+            </div>
+        </div>
+    `
+
+    let newTaskContainer = containerComplete.querySelector('.main__container')
+    newTaskContainer.style.borderColor = task.color
+
+    let parent = isComplete ? document.querySelector('.main__complete') : document.querySelector('.main__task-container')
+    parent.appendChild(containerComplete)
+
+    if (isComplete) {
+        counter++
+    } else {
+        counter--
+    }
     counterValue.innerHTML = `${counter}/${counterAll}`
+
+    // обработчики событий для кнопок
+    const deleteButton = containerComplete.querySelector('.main__btn-delete')
+    deleteButton.addEventListener('click', () => removeTask(containerComplete, task.time))
+
+    if (isComplete) {
+        const returnButton = containerComplete.querySelector('.main__btn-return')
+        returnButton.addEventListener('click', () => toggleCompleteTask(containerComplete, task.time, false))
+    } else {
+        const completeButton = containerComplete.querySelector('.main__btn-complete')
+        completeButton.addEventListener('click', () => toggleCompleteTask(containerComplete, task.time, true))
+
+        const editButton = containerComplete.querySelector('.main__btn-edit')
+        editButton.addEventListener('click', () => editTask(task, containerComplete))
+    }
+
     checkCounter()
     isVisibleComplete()
-    
+    isVisibleTextComplete()
 }
+
 
 function editTask(taskData, taskElement) {
     openModal()
@@ -208,15 +260,34 @@ function updateTask(taskTime, taskElement) {
     isEditing = false
     currentEditingTask = null
     reset()
+    isVisibleComplete()
+    isVisibleTextComplete()
 }
 
 function isVisibleComplete() {
-    menuComplete.style.display = counter <= 0 ? 'none' : 'block'
+    if (counter > 0) {
+        mainComplete.style.display = 'block'
+        } else {
+            mainComplete.style.display = 'none'
+    }
+}
+
+function isVisibleTextComplete() {
+    if (counter > 0) {
+        textComplete.style.display = 'block'
+        } else {
+        textComplete.style.display = 'none'
+    }
 }
 
 function checkCounter() {
-    counterElement.style.display = counterAll <= 0 ? 'none' : 'block'
+    if (counterAll <= 0) {
+          counterElement.style.display = 'none'
+    } else {
+          counterElement.style.display = 'block'
+    }
 }
+
 
 function inputChange() {
     toggleWarning()
@@ -253,9 +324,10 @@ function reset() {
     document.querySelector('input[name="level"][value="Low"]').checked = true
     isEditing = false
     currentEditingTask = null
+
     // Перепривязка обработчика для кнопки "Сохранить"
-    save.removeEventListener('click', modalClickSave)
-    save.addEventListener('click', modalClickSave)
+    modalSave.removeEventListener('click', modalClickSave)
+    modalSave.addEventListener('click', modalClickSave)
 }
 
 function modalClickSave(e) {
@@ -270,13 +342,14 @@ function modalClickSave(e) {
 }
 
 function warning() {
-    inputTitle.value ? inputTitle.classList.remove('warning') : inputTitle.classList.add('warning')
-    inputDescription.value ? inputDescription.classList.remove('warning') : inputDescription.classList.add('warning')
+    inputTitle.value ? inputTitle.classList.remove('warning') 
+    : inputTitle.classList.add('warning')
+    inputDescription.value ? inputDescription.classList.remove('warning') 
+    : inputDescription.classList.add('warning')
     return inputTitle.value && inputDescription.value
 }
 
 function createTask(e) {
-    // e.preventDefault()
     if (!warning() || isEditing) return
 
     offer.style.display = 'none'
@@ -300,6 +373,7 @@ function createTask(e) {
     counterValue.innerHTML = `${counter}/${counterAll}`
     checkCounter()
     isVisibleComplete()
+    isVisibleTextComplete()
 }
 
 // тёмная тема
@@ -317,7 +391,7 @@ function onLoad() {
     const isDarkMode = localStorage.getItem('darkMode') === 'true'
     document.body.classList.toggle('dark-mode', isDarkMode)
     modalDialog.classList.toggle('dark-mode', isDarkMode)
-
+    subMenu.classList.toggle('dark-mode', isDarkMode)
 }
 document.addEventListener('DOMContentLoaded', onLoad)
 
@@ -332,3 +406,49 @@ function subMenuExit(e) {
     }
 }
 
+// сортировка по дате создания
+
+function dateUp(isComplete){
+    tasksData.sort((a, b) => b.time - a.time)
+    updateSortTasks()
+    if (isComplete){
+    tasksData.sort((a, b) => b.time - a.time)
+    updateSortTasks()
+
+    }
+    console.log(tasksData)
+}
+function dateDown(task) {
+    tasksData.sort((a, b) => a.time - b.time)
+    updateSortTasks()
+    if (task.isDone){
+        tasksData.sort((a, b) => a.time - b.time)
+        updateSortTasks()
+
+        }
+}
+
+
+function updateSortTasks() {
+    let taskContainer = document.querySelector('.main__task-container')
+    let completedContainer = document.querySelector('.main__complete')
+    // Очистка контейнеров
+    taskContainer.innerHTML = ''
+    completedContainer.innerHTML = ''
+
+    // Повторное добавление задач на страницу
+    tasksData.forEach(task => addTask(task, task.isDone))
+    counterAll = tasksData.length
+    localStorage.setItem('data', JSON.stringify(tasksData))
+    counterValue.innerHTML = `${counter}/${counterAll}`
+
+    
+    checkCounter()
+    isVisibleComplete()
+    isVisibleTextComplete()
+init()
+
+}
+
+isVisibleComplete()
+isVisibleTextComplete()
