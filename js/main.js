@@ -98,7 +98,7 @@ function addTask(data, isComplete = false) {
     const newTaskContainer = newTask.querySelector('.main__container')
     newTaskContainer.style.borderColor = color
 
-    addButton(data, newTask)
+    addButtons(data, newTask)
 }
 
 
@@ -170,9 +170,7 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
     //     editButton.addEventListener('click', () => editTask(task, containerComplete))
     // }
 
-    addButton (task,containerComplete)
-    checkCounter()
-    isVisibleComplete()
+    addButtons (task,containerComplete)
 }
 
 
@@ -225,7 +223,7 @@ function updateTask(taskTime, taskElement) {
     const newTaskContainer = taskElement.querySelector('.main__container')
     newTaskContainer.style.borderColor = updatedTask.color;
 
-    addButton(updatedTask,taskElement)
+    addButtons(updatedTask,taskElement)
 
             // const deleteButton = taskElement.querySelector('.main__btn-delete')
             // deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
@@ -244,12 +242,10 @@ function updateTask(taskTime, taskElement) {
     isEditing = false
     currentEditingTask = null
     reset()
-    isVisibleComplete()
-    checkCounter()
 }
 
 
-function addButton(taskData, taskElement) {
+function addButtons(taskData, taskElement) {
     const deleteButton = taskElement.querySelector('.main__btn-delete')
     if (deleteButton) {
         deleteButton.addEventListener('click', () => removeTask(taskElement, taskData.time))
@@ -351,8 +347,6 @@ function reset() {
     document.querySelector('input[name="level"][value="Low"]').checked = true
     isEditing = false
     currentEditingTask = null
-
-    
 }
 
 function modalClickSave(e) {
