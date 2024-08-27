@@ -165,19 +165,7 @@
   width: 40px;
   cursor: pointer;
 }
-
-.body {
-  color: #373737;
-  background: white;
-  transition: all 0.3s ease;
-}
-
-.dark-mode {
-  color: white;
-  background: #373737;
-}
-
-.sub__menu-wrap {
+.header__menu-wrap {
   position: absolute;
   top: 11%;
   right: 1.5%;
@@ -188,23 +176,34 @@
   color: #373737;
   background: white;
 }
-.sub__menu {
+.header__menu {
   color: #373737;
   background: white;
   padding: 20px;
   display: flex;
   justify-content: center;
 }
-.sub__menu-wrap.open-menu {
+.header__menu-wrap.open-menu {
   max-height: 200px;
   transition: max-height 0.5s;
   border: 2px solid black;
-  border-radius: 20px;
+  display: flex;
+  justify-content: center;
 }
-
-.change-mode {
+.header__change-mode {
   display: flex;
   align-items: center;
+}
+
+.body {
+  color: #373737;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.dark-mode {
+  color: white;
+  background: #373737;
 }
 
 .main__offer {

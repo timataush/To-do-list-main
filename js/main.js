@@ -14,7 +14,7 @@ let counterValue = document.querySelector('.main__quantity-num')
 let textComplete = document.querySelector('.main__text')
 let mainComplete = document.querySelector('.main__complete')
 let headerSetting = document.querySelector('.header__setting')
-let subMenu = document.querySelector('.sub__menu-wrap')
+let subMenu = document.querySelector('.header__menu-wrap')
 let sortUp = document.querySelector('.header__sort-up')
 let sortDown = document.querySelector('.header__sort-down')
 
@@ -52,14 +52,12 @@ function init() {
         offer.style.display = 'flex'
         counterElement.style.display = 'none'
     }
-    counterAll = tasksData.length;
+    counterAll = tasksData.length
     counter = tasksData.filter(task => task.isDone).length
-    counterValue.innerHTML = `${counter}/${counterAll}`
 
     checkCounter()
     isVisibleComplete()
-    isVisibleTextComplete()
-    
+
 }
 // Создание задач из LocalStorage
 tasksData.forEach(task => addTask(task, task.isDone))
@@ -121,14 +119,15 @@ function addTask(data, isComplete = false) {
 
 
 function removeTask(taskElement, taskTime) {
-    taskElement.remove();
+    taskElement.remove()
     tasksData = tasksData.filter(task => task.time !== taskTime)
     localStorage.setItem('data', JSON.stringify(tasksData))
     counterAll--
-    counterValue.innerHTML = `${counter}/${counterAll}`
     checkCounter()
-    init()
+    isVisibleComplete()
 }
+
+
 
 
 function toggleCompleteTask(taskElement, taskTime, isComplete) {
@@ -171,9 +170,8 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
     } else {
         counter--
     }
-    counterValue.innerHTML = `${counter}/${counterAll}`
 
-    // обработчики событий для кнопок
+    // // обработчики событий для кнопок
     const deleteButton = containerComplete.querySelector('.main__btn-delete')
     deleteButton.addEventListener('click', () => removeTask(containerComplete, task.time))
 
@@ -188,9 +186,9 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
         editButton.addEventListener('click', () => editTask(task, containerComplete))
     }
 
+    // addButton (taskElement,containerComplete)
     checkCounter()
     isVisibleComplete()
-    isVisibleTextComplete()
 }
 
 
@@ -243,49 +241,72 @@ function updateTask(taskTime, taskElement) {
     let newTaskContainer = taskElement.querySelector('.main__container')
     newTaskContainer.style.borderColor = updatedTask.color;
 
-    const deleteButton = taskElement.querySelector('.main__btn-delete')
-    deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
+    // addButton(updatedTask,taskElement)
 
-    if (updatedTask.isDone) {
-        const returnButton = taskElement.querySelector('.main__btn-return')
-        returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
-    } else {
-        const completeButton = taskElement.querySelector('.main__btn-complete')
-        completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
-    }
-
-    const editButton = taskElement.querySelector('.main__btn-edit')
-    editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
+    // function addButton (updatedTask,taskElement,containerComplete){
+            const deleteButton = taskElement.querySelector('.main__btn-delete')
+            deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
+        
+            if (updatedTask.isDone) {
+                const returnButton = taskElement.querySelector('.main__btn-return')
+                returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
+            } else {
+                const completeButton = taskElement.querySelector('.main__btn-complete')
+                completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
+            }
+        
+            const editButton = taskElement.querySelector('.main__btn-edit')
+            editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
 
     isEditing = false
     currentEditingTask = null
     reset()
     isVisibleComplete()
-    isVisibleTextComplete()
+    checkCounter()
 }
+
+// function addButton (updatedTask,taskElement,containerComplete){
+//     const deleteButton = containerComplete.querySelector('.main__btn-delete')&&taskElement.querySelector('.main__btn-delete')
+//     deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
+
+//     if (updatedTask.isDone) {
+//         const returnButton = containerComplete.querySelector('.main__btn-return')&&taskElement.querySelector('.main__btn-return')
+//         returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
+//     } else {
+//         const completeButton = containerComplete.querySelector('.main__btn-complete')&&taskElement.querySelector('.main__btn-complete')
+//         completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
+//     }
+
+//     const editButton = containerComplete.querySelector('.main__btn-edit')&&taskElement.querySelector('.main__btn-edit')
+//     editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
+//     checkCounter()
+//     isVisibleComplete()
+// }
 
 function isVisibleComplete() {
     if (counter > 0) {
         mainComplete.style.display = 'block'
-        } else {
-            mainComplete.style.display = 'none'
-    }
-}
-
-function isVisibleTextComplete() {
-    if (counter > 0) {
         textComplete.style.display = 'block'
         } else {
+        mainComplete.style.display = 'none'
         textComplete.style.display = 'none'
     }
 }
 
+
 function checkCounter() {
     if (counterAll <= 0) {
-          counterElement.style.display = 'none'
+        counterElement.style.display = 'none'
+        offer.style.display = 'flex'
     } else {
-          counterElement.style.display = 'block'
+        counterElement.style.display = 'block'
+        offer.style.display = 'none'
+
     }
+    counter = tasksData.filter(task => task.isDone).length
+
+    counterValue.innerHTML = `${counter}/${counterAll}`
+
 }
 
 
@@ -325,9 +346,7 @@ function reset() {
     isEditing = false
     currentEditingTask = null
 
-    // Перепривязка обработчика для кнопки "Сохранить"
-    modalSave.removeEventListener('click', modalClickSave)
-    modalSave.addEventListener('click', modalClickSave)
+    
 }
 
 function modalClickSave(e) {
@@ -370,10 +389,8 @@ function createTask(e) {
     reset()
 
     counterAll++
-    counterValue.innerHTML = `${counter}/${counterAll}`
     checkCounter()
     isVisibleComplete()
-    isVisibleTextComplete()
 }
 
 // тёмная тема
@@ -385,7 +402,7 @@ function darkMode() {
     modalDialog.classList.toggle('dark-mode', !wasDarkMode)
     subMenu.classList.toggle('dark-mode', !wasDarkMode)
 }
-document.querySelector('.change-mode').addEventListener('click', darkMode)
+document.querySelector('.header__change-mode').addEventListener('click', darkMode)
 
 function onLoad() {
     const isDarkMode = localStorage.getItem('darkMode') === 'true'
@@ -407,7 +424,6 @@ function subMenuExit(e) {
 }
 
 // сортировка по дате создания
-
 function dateUp(isComplete){
     tasksData.sort((a, b) => b.time - a.time)
     updateSortTasks()
@@ -438,17 +454,8 @@ function updateSortTasks() {
 
     // Повторное добавление задач на страницу
     tasksData.forEach(task => addTask(task, task.isDone))
-    counterAll = tasksData.length
-    localStorage.setItem('data', JSON.stringify(tasksData))
-    counterValue.innerHTML = `${counter}/${counterAll}`
-
-    
     checkCounter()
     isVisibleComplete()
-    isVisibleTextComplete()
-init()
 
 }
 
-isVisibleComplete()
-isVisibleTextComplete()
