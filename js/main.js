@@ -457,7 +457,6 @@ function updateSortTasks() {
     // Очистка контейнеров
     taskContainer.innerHTML = ''
     completedContainer.innerHTML = ''
-
     // Повторное добавление задач на страницу
     tasksData.forEach(task => addTask(task, task.isDone))
     checkCounter()
