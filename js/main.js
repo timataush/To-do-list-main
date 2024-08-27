@@ -1,22 +1,22 @@
 // Важные объявления переменных
-let openModalBtn = document.querySelectorAll('.header__creature')
-let offerBtn = document.querySelectorAll('.main__creature')
-let modalOverlay = document.querySelector('.modal__overlay')
-let modalDialog = document.querySelector('.modal__dialog')
-let modalExit = document.querySelector('.modal__close')
-let modalSave = document.querySelector('.btn.ok')
-let modalCancel = document.querySelector('.btn.cancel')
-let inputTitle = document.querySelector('.modal__input-title')
-let inputDescription = document.querySelector('.modal__input-description')
-let offer = document.querySelector('.main__offer')
-let counterElement = document.querySelector('.main__counter')
-let counterValue = document.querySelector('.main__quantity-num')
-let textComplete = document.querySelector('.main__text')
-let mainComplete = document.querySelector('.main__complete')
-let headerSetting = document.querySelector('.header__setting')
-let subMenu = document.querySelector('.header__menu-wrap')
-let sortUp = document.querySelector('.header__sort-up')
-let sortDown = document.querySelector('.header__sort-down')
+const openModalBtn = document.querySelectorAll('.header__creature')
+const offerBtn = document.querySelectorAll('.main__creature')
+const modalOverlay = document.querySelector('.modal__overlay')
+const modalDialog = document.querySelector('.modal__dialog')
+const modalExit = document.querySelector('.modal__close')
+const modalSave = document.querySelector('.btn.ok')
+const modalCancel = document.querySelector('.btn.cancel')
+const inputTitle = document.querySelector('.modal__input-title')
+const inputDescription = document.querySelector('.modal__input-description')
+const offer = document.querySelector('.main__offer')
+const counterElement = document.querySelector('.main__counter')
+const counterValue = document.querySelector('.main__quantity-num')
+const textComplete = document.querySelector('.main__text')
+const mainComplete = document.querySelector('.main__complete')
+const headerSetting = document.querySelector('.header__setting')
+const subMenu = document.querySelector('.header__menu-wrap')
+const sortUp = document.querySelector('.header__sort-up')
+const sortDown = document.querySelector('.header__sort-down')
 
 // Обработчики событий
 modalExit.addEventListener('click', modalClose)
@@ -69,9 +69,10 @@ offerBtn.forEach(creature => {
     creature.addEventListener('click', openModal)
 })
 
+
 function addTask(data, isComplete = false) {
-    let { title, description, color, level, time, isDone = false } = data
-    let newTask = document.createElement('div')
+    const { title, description, color, level, time, isDone = false } = data
+    const newTask = document.createElement('div')
     newTask.className = 'main__task'
     newTask.innerHTML = `
         <div class="main__container">
@@ -84,37 +85,20 @@ function addTask(data, isComplete = false) {
                 <span class="main__time">${new Date(time).toLocaleString()}</span>
                 <div class="main__btn">
                     ${isComplete ? '<button class="main__btn-return">return</button>' : '<button class="main__btn-complete">complete</button>'}
-                    ${isComplete ? '' : '<button class="main__btn-edit">edit</button>'}
+                    ${!isComplete ? '<button class="main__btn-edit">edit</button>' : ''}
                     <button class="main__btn-delete">delete</button>
                 </div>
             </div>
          </div>
      `
-    let parent = isComplete ? document.querySelector('.main__complete') : document.querySelector('.main__task-container')
+
+     const parent = isComplete ? document.querySelector('.main__complete') : document.querySelector('.main__task-container')
     parent.appendChild(newTask)
 
-    let newTaskContainer = newTask.querySelector('.main__container')
+    const newTaskContainer = newTask.querySelector('.main__container')
     newTaskContainer.style.borderColor = color
 
-    // Обработчик "delete"
-    const deleteButton = newTask.querySelector('.main__btn-delete')
-    deleteButton.addEventListener('click', () => removeTask(newTask, time))
-
-    // Обработчик "complete" и "return"
-    if (isComplete) {
-        const returnButton = newTask.querySelector('.main__btn-return')
-        returnButton.addEventListener('click', () => toggleCompleteTask(newTask, time, false))
-    } else {
-        const completeButton = newTask.querySelector('.main__btn-complete')
-        completeButton.addEventListener('click', () => toggleCompleteTask(newTask, time, true))
-    }
-
-    // Обработчик "edit"
-    if (!isComplete) {
-        const editButton = newTask.querySelector('.main__btn-edit')
-        editButton.addEventListener('click', () => editTask(data, newTask))
-    }
-    
+    addButton(data, newTask)
 }
 
 
@@ -131,7 +115,7 @@ function removeTask(taskElement, taskTime) {
 
 
 function toggleCompleteTask(taskElement, taskTime, isComplete) {
-    let task = tasksData.find(task => task.time === taskTime)
+    const task = tasksData.find(task => task.time === taskTime)
     if (!task) return
 
     task.isDone = isComplete
@@ -139,7 +123,7 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
 
     taskElement.remove()
 
-    let containerComplete = document.createElement('div')
+    const containerComplete = document.createElement('div')
     containerComplete.className = 'main__task'
     containerComplete.innerHTML = `
         <div class="main__container">
@@ -159,10 +143,10 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
         </div>
     `
 
-    let newTaskContainer = containerComplete.querySelector('.main__container')
+    const newTaskContainer = containerComplete.querySelector('.main__container')
     newTaskContainer.style.borderColor = task.color
 
-    let parent = isComplete ? document.querySelector('.main__complete') : document.querySelector('.main__task-container')
+    const parent = isComplete ? document.querySelector('.main__complete') : document.querySelector('.main__task-container')
     parent.appendChild(containerComplete)
 
     if (isComplete) {
@@ -172,21 +156,21 @@ function toggleCompleteTask(taskElement, taskTime, isComplete) {
     }
 
     // // обработчики событий для кнопок
-    const deleteButton = containerComplete.querySelector('.main__btn-delete')
-    deleteButton.addEventListener('click', () => removeTask(containerComplete, task.time))
+    // const deleteButton = containerComplete.querySelector('.main__btn-delete')
+    // deleteButton.addEventListener('click', () => removeTask(containerComplete, task.time))
 
-    if (isComplete) {
-        const returnButton = containerComplete.querySelector('.main__btn-return')
-        returnButton.addEventListener('click', () => toggleCompleteTask(containerComplete, task.time, false))
-    } else {
-        const completeButton = containerComplete.querySelector('.main__btn-complete')
-        completeButton.addEventListener('click', () => toggleCompleteTask(containerComplete, task.time, true))
+    // if (isComplete) {
+    //     const returnButton = containerComplete.querySelector('.main__btn-return')
+    //     returnButton.addEventListener('click', () => toggleCompleteTask(containerComplete, task.time, false))
+    // } else {
+    //     const completeButton = containerComplete.querySelector('.main__btn-complete')
+    //     completeButton.addEventListener('click', () => toggleCompleteTask(containerComplete, task.time, true))
 
-        const editButton = containerComplete.querySelector('.main__btn-edit')
-        editButton.addEventListener('click', () => editTask(task, containerComplete))
-    }
+    //     const editButton = containerComplete.querySelector('.main__btn-edit')
+    //     editButton.addEventListener('click', () => editTask(task, containerComplete))
+    // }
 
-    // addButton (taskElement,containerComplete)
+    addButton (task,containerComplete)
     checkCounter()
     isVisibleComplete()
 }
@@ -205,7 +189,7 @@ function editTask(taskData, taskElement) {
 function updateTask(taskTime, taskElement) {
     if (!warning()) return
 
-    let updatedTask = {
+    const updatedTask = {
         title: inputTitle.value,
         description: inputDescription.value,
         color: document.querySelector('.modal__input-color').value,
@@ -214,7 +198,7 @@ function updateTask(taskTime, taskElement) {
         isDone: currentEditingTask.taskData.isDone
     }
 
-    let taskIndex = tasksData.findIndex(task => task.time === taskTime)
+    const taskIndex = tasksData.findIndex(task => task.time === taskTime)
     if (taskIndex !== -1) {
         tasksData[taskIndex] = updatedTask
     }
@@ -238,25 +222,24 @@ function updateTask(taskTime, taskElement) {
         </div>
     `
 
-    let newTaskContainer = taskElement.querySelector('.main__container')
+    const newTaskContainer = taskElement.querySelector('.main__container')
     newTaskContainer.style.borderColor = updatedTask.color;
 
-    // addButton(updatedTask,taskElement)
+    addButton(updatedTask,taskElement)
 
-    // function addButton (updatedTask,taskElement,containerComplete){
-            const deleteButton = taskElement.querySelector('.main__btn-delete')
-            deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
+            // const deleteButton = taskElement.querySelector('.main__btn-delete')
+            // deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
         
-            if (updatedTask.isDone) {
-                const returnButton = taskElement.querySelector('.main__btn-return')
-                returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
-            } else {
-                const completeButton = taskElement.querySelector('.main__btn-complete')
-                completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
-            }
+            // if (updatedTask.isDone) {
+            //     const returnButton = taskElement.querySelector('.main__btn-return')
+            //     returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
+            // } else {
+            //     const completeButton = taskElement.querySelector('.main__btn-complete')
+            //     completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
+            // }
         
-            const editButton = taskElement.querySelector('.main__btn-edit')
-            editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
+            // const editButton = taskElement.querySelector('.main__btn-edit')
+            // editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
 
     isEditing = false
     currentEditingTask = null
@@ -265,20 +248,43 @@ function updateTask(taskTime, taskElement) {
     checkCounter()
 }
 
-// function addButton (updatedTask,taskElement,containerComplete){
-//     const deleteButton = containerComplete.querySelector('.main__btn-delete')&&taskElement.querySelector('.main__btn-delete')
-//     deleteButton.addEventListener('click', () => removeTask(taskElement, updatedTask.time))
 
-//     if (updatedTask.isDone) {
-//         const returnButton = containerComplete.querySelector('.main__btn-return')&&taskElement.querySelector('.main__btn-return')
-//         returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, false))
-//     } else {
-//         const completeButton = containerComplete.querySelector('.main__btn-complete')&&taskElement.querySelector('.main__btn-complete')
-//         completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, updatedTask.time, true))
-//     }
+function addButton(taskData, taskElement) {
+    const deleteButton = taskElement.querySelector('.main__btn-delete')
+    if (deleteButton) {
+        deleteButton.addEventListener('click', () => removeTask(taskElement, taskData.time))
+    }
 
-//     const editButton = containerComplete.querySelector('.main__btn-edit')&&taskElement.querySelector('.main__btn-edit')
+    if (taskData.isDone) {
+        const returnButton = taskElement.querySelector('.main__btn-return')
+        if (returnButton) {
+            returnButton.addEventListener('click', () => toggleCompleteTask(taskElement, taskData.time, false))
+        }
+    } else {
+        const completeButton = taskElement.querySelector('.main__btn-complete')
+        if (completeButton) {
+            completeButton.addEventListener('click', () => toggleCompleteTask(taskElement, taskData.time, true))
+        }
+    }
+
+    const editButton = taskElement.querySelector('.main__btn-edit')
+    if (editButton) {
+        editButton.addEventListener('click', () => editTask(taskData, taskElement))
+    }
+
+    checkCounter()
+    isVisibleComplete()
+}
+
+
+
+
+
+//     const editButton = containerComplete.querySelector('.main__btn-edit')
+//     &&taskElement.querySelector('.main__btn-edit')
 //     editButton.addEventListener('click', () => editTask(updatedTask, taskElement))
+//     editButton.addEventListener('click', () => editTask(task, containerComplete))
+
 //     checkCounter()
 //     isVisibleComplete()
 // }
@@ -446,8 +452,8 @@ function dateDown(task) {
 
 
 function updateSortTasks() {
-    let taskContainer = document.querySelector('.main__task-container')
-    let completedContainer = document.querySelector('.main__complete')
+    const taskContainer = document.querySelector('.main__task-container')
+    const completedContainer = document.querySelector('.main__complete')
     // Очистка контейнеров
     taskContainer.innerHTML = ''
     completedContainer.innerHTML = ''
